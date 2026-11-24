@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fibra resiliente</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+  <link rel="stylesheet" href="estilos.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+  <script defer src="mapa.js"></script>
+</head>
+<body>
+  <header class="cabecera">
+    <div class="contenedor">
+      <span class="marca" aria-hidden="true"><span></span></span>
+      <div>
+        <h1>Fibra resiliente</h1>
+        <p>Infraestructura de fibra óptica en Chile</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenedor visor">
+    <section class="tarjeta tarjeta-mapa" aria-labelledby="titulo-mapa">
+      <div class="barra-mapa">
+        <h2 id="titulo-mapa">Mapa de la red</h2>
+        <button id="ver-red" type="button" aria-controls="mapa" disabled>Ver red completa</button>
+      </div>
+      <div class="superficie-mapa">
+        <div id="mapa" role="region" aria-label="Mapa interactivo de fibra óptica"></div>
+        <p id="aviso-mapa" class="aviso-mapa" role="status" hidden></p>
+        <noscript><p class="aviso-mapa">Activa JavaScript para ver el mapa.</p></noscript>
+      </div>
+    </section>
+
+    <aside class="tarjeta panel" aria-label="Capas y conectividad">
+      <section aria-labelledby="titulo-capas">
+        <h2 id="titulo-capas">Capas del mapa</h2>
+        <label class="capa">
+          <input id="mostrar-fibra" type="checkbox" aria-controls="mapa" checked disabled>
+          <span class="muestra muestra-fibra" aria-hidden="true"></span>
+          Fibra observada
+          <span id="total-fibra" class="cantidad-capa"></span>
+        </label>
+        <label class="capa">
+          <input id="mostrar-accesos" type="checkbox" aria-controls="mapa" checked disabled>
+          <span class="muestra muestra-acceso" aria-hidden="true"></span>
+          Accesos sintéticos
+          <span id="total-accesos" class="cantidad-capa"></span>
+        </label>
+        <label class="capa">
+          <input id="mostrar-sitios" type="checkbox" aria-controls="mapa" checked disabled>
+          <span class="muestra muestra-sitio" aria-hidden="true"></span>
+          Sitios clave
+          <span id="total-sitios" class="cantidad-capa"></span>
+        </label>
+        <label class="capa">
+          <input id="mostrar-epicentro" type="checkbox" aria-controls="mapa" checked disabled>
+          <span class="muestra muestra-sismo" aria-hidden="true"></span>
+          Epicentro
+        </label>
+        <p id="estado-mapa" class="detalle" role="status">Cargando capas…</p>
+        <p class="detalle">Catastro Yafún · Respuesta T5610</p>
+        <p class="detalle">Las líneas naranjas discontinuas son conexiones supuestas para la simulación.</p>
+        <label class="selector-acceso">
+          Acercar a un acceso
+          <select id="ver-accesos" aria-controls="mapa" disabled>
+            <option value="" selected>Elige un sitio</option>
+          </select>
+        </label>
+      </section>
+
+      <section aria-labelledby="titulo-sismo">
+        <h2 id="titulo-sismo">Terremoto del Maule</h2>
+        <p class="detalle"><time id="sismo-fecha">—</time></p>
+        <p class="magnitud">Magnitud <strong id="sismo-magnitud">—</strong></p>
+        <p class="detalle">Daño en los enlaces por estimar</p>
+        <div class="acciones-sismo">
+          <button id="ver-epicentro" type="button" aria-controls="mapa" disabled>Ir al epicentro</button>
+          <a href="https://earthquake.usgs.gov/earthquakes/eventpage/official20100227063411530_30/shakemap"
+             target="_blank" rel="noopener noreferrer">Fuente USGS</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="titulo-attr">
+        <h2 id="titulo-attr">Conectividad (ATTR)</h2>
+        <p class="detalle">Fiabilidad promedio entre pares de nodos clave.</p>
+        <dl class="indicadores">
+          <div>
+            <dt>Antes del sismo</dt>
+            <dd id="attr-antes">Pendiente</dd>
+          </div>
+          <div>
+            <dt>Después del sismo</dt>
+            <dd id="attr-despues">Pendiente</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+  </main>
+</body>
+</html>
