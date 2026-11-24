@@ -11,7 +11,7 @@ foreach ($escenario in @(
     Write-Host "`nEscenario $($escenario.Nombre)"
     $sql = $base.Replace('BEGIN;', "BEGIN;`nCREATE SCHEMA comparacion_tolerancias;")
     $sql = $sql.Replace('public.fibra_enlaces', 'comparacion_tolerancias.fibra_enlaces')
-    # La exclusión de cortes a menos de 1 cm de un extremo es igual en todos los casos.
+    # El umbral para los cortes se mantiene en 1 cm.
     $sql = $sql.Replace('ST_StartPoint(f.geom)::geography, 0.01)', 'ST_StartPoint(f.geom)::geography, UMBRAL_CORTE)')
     $sql = $sql.Replace('ST_EndPoint(f.geom)::geography, 0.01)', 'ST_EndPoint(f.geom)::geography, UMBRAL_CORTE)')
     $sql = $sql.Replace('0.01', $escenario.Metros)

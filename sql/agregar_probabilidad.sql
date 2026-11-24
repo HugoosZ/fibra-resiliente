@@ -1,4 +1,3 @@
--- Aplicar a la topología existente, sin reemplazar sus enlaces.
 ALTER TABLE public.fibra_enlaces
     ADD COLUMN IF NOT EXISTS prob_falla double precision NOT NULL DEFAULT 0
     CHECK (prob_falla BETWEEN 0 AND 1);

@@ -13,6 +13,8 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/20-fibra.sql:ro
       - ./red:/data/red:ro
+      - ./main.sql:/proyecto/main.sql:ro
+      - ./sql:/proyecto/sql:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "fibra", "-d", "fibra"]
       interval: 5s

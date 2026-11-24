@@ -1,7 +1,6 @@
--- El metro es un radio de exploración, no una regla de conexión.
+-- El radio exploratorio de 1 m identifica candidatos para revisar.
 BEGIN;
 
--- Guardamos temporalmente los dos extremos de cada trazado.
 CREATE TEMP TABLE extremos_fibra ON COMMIT DROP AS
 SELECT gid, 'inicio' AS extremo, ST_StartPoint(geom) AS punto
 FROM public.fibra_optica_detectada
@@ -12,7 +11,6 @@ FROM public.fibra_optica_detectada;
 CREATE INDEX ON extremos_fibra USING gist ((punto::geography));
 ANALYZE extremos_fibra;
 
--- Comparamos extremos de trazados distintos, sin repetir el mismo par.
 CREATE TEMP TABLE extremos_cercanos ON COMMIT DROP AS
 SELECT
     a.gid AS trazado_a,
@@ -37,7 +35,6 @@ FROM extremos_cercanos
 ORDER BY (distancia_metros = 0), distancia_metros, trazado_a, extremo_a, trazado_b, extremo_b
 LIMIT 5;
 
--- Buscamos extremos que coinciden exactamente con el interior de otra línea.
 CREATE TEMP TABLE extremos_en_interiores ON COMMIT DROP AS
 SELECT
     e.gid AS trazado_del_extremo,

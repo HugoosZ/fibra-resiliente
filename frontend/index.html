@@ -27,6 +27,13 @@
     <section class="tarjeta tarjeta-mapa" aria-labelledby="titulo-mapa">
       <div class="barra-mapa">
         <h2 id="titulo-mapa">Mapa de la red</h2>
+        <label id="control-escenario" class="selector-escenario" hidden>
+          Escenario
+          <select id="escenario-mapa" aria-controls="mapa">
+            <option value="inicial">Antes del sismo</option>
+            <option value="posterior">Escenario 27F</option>
+          </select>
+        </label>
         <button id="ver-red" type="button" aria-controls="mapa" disabled>Ver red completa</button>
       </div>
       <div class="superficie-mapa">
@@ -65,6 +72,17 @@
         <p id="estado-mapa" class="detalle" role="status">Cargando capas…</p>
         <p class="detalle">Catastro Yafún · Respuesta T5610</p>
         <p class="detalle">Las líneas naranjas discontinuas son conexiones supuestas para la simulación.</p>
+        <div id="leyenda-falla" class="leyenda-falla" hidden>
+          <h3>Probabilidad estimada de falla</h3>
+          <ul>
+            <li><span class="muestra muestra-fibra" aria-hidden="true"></span>0 %</li>
+            <li><span class="muestra muestra-falla-baja" aria-hidden="true"></span>Más de 0 % y hasta 1 %</li>
+            <li><span class="muestra muestra-falla-media" aria-hidden="true"></span>Más de 1 % y hasta 10 %</li>
+            <li><span class="muestra muestra-falla-alta" aria-hidden="true"></span>Más de 10 %</li>
+            <li><span class="muestra muestra-fuera-alcance" aria-hidden="true"></span>Sin estimación</li>
+          </ul>
+          <p class="detalle">El modelo supone operativos los accesos sintéticos y las partes que quedan fuera de su alcance.</p>
+        </div>
         <label class="selector-acceso">
           Acercar a un acceso
           <select id="ver-accesos" aria-controls="mapa" disabled>
@@ -77,7 +95,7 @@
         <h2 id="titulo-sismo">Terremoto del Maule</h2>
         <p class="detalle"><time id="sismo-fecha">—</time></p>
         <p class="magnitud">Magnitud <strong id="sismo-magnitud">—</strong></p>
-        <p class="detalle">Daño en los enlaces por estimar</p>
+        <p id="estado-falla" class="detalle">Daño en los enlaces por estimar</p>
         <div class="acciones-sismo">
           <button id="ver-epicentro" type="button" aria-controls="mapa" disabled>Ir al epicentro</button>
           <a href="https://earthquake.usgs.gov/earthquakes/eventpage/official20100227063411530_30/shakemap"
@@ -87,17 +105,18 @@
 
       <section aria-labelledby="titulo-attr">
         <h2 id="titulo-attr">Conectividad (ATTR)</h2>
-        <p class="detalle">Fiabilidad promedio entre pares de nodos clave.</p>
+        <p class="detalle">Probabilidad promedio de que exista un camino entre dos nodos clave.</p>
         <dl class="indicadores">
           <div>
             <dt>Antes del sismo</dt>
-            <dd id="attr-antes">Pendiente</dd>
+            <dd id="attr-antes">—</dd>
           </div>
           <div>
             <dt>Después del sismo</dt>
             <dd id="attr-despues">Pendiente</dd>
           </div>
         </dl>
+        <p id="detalle-attr" class="detalle" role="status" hidden></p>
       </section>
     </aside>
   </main>

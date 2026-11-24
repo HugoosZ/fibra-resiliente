@@ -1,5 +1,4 @@
--- Modelo exploratorio: extremos a hasta 1 cm y uniones exactas con interiores.
--- Las conexiones representan supuestos geográficos, no empalmes comprobados.
+-- Las conexiones de la topología se infieren de las geometrías del catastro.
 BEGIN;
 
 CREATE TEMP TABLE extremos_originales ON COMMIT DROP AS
@@ -12,7 +11,6 @@ SELECT gid, geom, geom::geography AS ubicacion FROM public.fibra_optica_detectad
 CREATE INDEX ON lineas_geograficas USING gist (ubicacion);
 ANALYZE lineas_geograficas;
 
--- Informar cercanías al interior que no coinciden exactamente con la línea.
 SELECT COUNT(*) AS extremos_cercanos_al_interior
 FROM extremos_originales e
 JOIN lineas_geograficas f ON e.gid <> f.gid
@@ -32,7 +30,7 @@ WHERE NOT ST_Intersects(f.geom, e.punto)
 ORDER BY distancia_metros, trazado_del_extremo, trazado_cercano
 LIMIT 5;
 
--- Dividir únicamente donde un extremo coincide exactamente con el interior.
+-- Solo una coincidencia exacta con el interior genera un corte.
 CREATE TEMP TABLE cortes ON COMMIT DROP AS
 SELECT f.gid, ST_Collect(DISTINCT e.punto) AS puntos
 FROM public.fibra_optica_detectada f
@@ -61,7 +59,6 @@ CROSS JOIN LATERAL ST_Dump(
 ) parte
 ORDER BY f.gid, parte.path;
 
--- Agrupar extremos a una distancia geodésica de hasta 1 cm.
 CREATE TEMP TABLE extremos_enlaces ON COMMIT DROP AS
 SELECT row_number() OVER (ORDER BY id, posicion) AS numero, id, posicion, punto
 FROM (
@@ -72,6 +69,7 @@ FROM (
 CREATE INDEX ON extremos_enlaces USING gist ((punto::geography));
 ANALYZE extremos_enlaces;
 
+-- Agrupar extremos a una distancia geodésica de hasta 1 cm.
 CREATE TEMP TABLE pares_extremos ON COMMIT DROP AS
 SELECT row_number() OVER (ORDER BY a.numero, b.numero) AS id,
        a.numero AS source, b.numero AS target, 1.0::float8 AS cost
@@ -86,7 +84,7 @@ LEFT JOIN pgr_connectedComponents(
     'SELECT id, source, target, cost FROM pares_extremos'
 ) c ON c.node = e.numero;
 
--- Evitar que cadenas de puntos amplíen la tolerancia dentro de un grupo.
+-- Cada par del grupo debe respetar 1 cm, incluso en una cadena de vecinos.
 DO $$
 BEGIN
     IF EXISTS (
@@ -126,7 +124,7 @@ END $$;
 UPDATE public.fibra_enlaces SET cost = ST_Length(geom::geography);
 CREATE INDEX fibra_enlaces_geom_idx ON public.fibra_enlaces USING gist (geom);
 
--- Los extremos ya se ajustaron en metros; tolerancia cero en grados.
+-- Tras ajustar los extremos en metros, pgRouting usa coordenadas iguales.
 DO $$
 BEGIN
     IF pgr_createTopology('public.fibra_enlaces', 0, 'geom', 'id', 'source', 'target') <> 'OK' THEN

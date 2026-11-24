@@ -1,6 +1,66 @@
 const estadoMapa = document.querySelector("#estado-mapa");
 const avisoMapa = document.querySelector("#aviso-mapa");
+const attrAntes = document.querySelector("#attr-antes");
+const attrDespues = document.querySelector("#attr-despues");
 const numeros = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 1 });
+const porcentajes = new Intl.NumberFormat("es-CL", { style: "percent", maximumFractionDigits: 2 });
+
+function esProbabilidad(valor) {
+  return Number.isFinite(valor) && valor >= 0 && valor <= 1;
+}
+
+function formatoProbabilidad(valor) {
+  return valor > 0 && valor < 0.0001 ? "menos de 0,01 %" : porcentajes.format(valor);
+}
+
+function colorFalla(enlace) {
+  const probabilidad = enlace.prob_falla;
+  if (enlace.alcance_modelo === "fuera" || !esProbabilidad(probabilidad)) return "--fuera-alcance";
+  if (probabilidad === 0) return "--fibra";
+  if (probabilidad <= 0.01) return "--falla-baja";
+  if (probabilidad <= 0.10) return "--falla-media";
+  return "--falla-alta";
+}
+
+function textoFalla(enlace) {
+  if (enlace.alcance_modelo === "fuera") {
+    return "Fuera del alcance del modelo. Se asumió 0 % de falla para la simulación.";
+  }
+  if (!esProbabilidad(enlace.prob_falla)) return "Probabilidad de falla sin estimar.";
+  const texto = `Probabilidad de falla estimada en el 27F: ${formatoProbabilidad(enlace.prob_falla)}.`;
+  if (enlace.alcance_modelo === "parcial") {
+    return `${texto} Las partes fuera del alcance se simularon con 0 % de falla.`;
+  }
+  return texto;
+}
+
+function actualizarAttr(attr) {
+  const inicialDisponible = esProbabilidad(attr?.attr_inicial);
+  const posteriorDisponible = esProbabilidad(attr?.attr_posterior);
+  const formato = new Intl.NumberFormat("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 5 });
+  attrAntes.textContent = inicialDisponible ? formato.format(attr.attr_inicial) : "No disponible";
+  attrDespues.textContent = posteriorDisponible ? formato.format(attr.attr_posterior) : "Pendiente";
+
+  const mensajes = [];
+  if (inicialDisponible && [attr.pares_conectados, attr.pares_totales, attr.nodos_clave].every(Number.isFinite)) {
+    mensajes.push(`${attr.pares_conectados} de ${attr.pares_totales} pares con camino antes del sismo entre ${attr.nodos_clave} nodos clave.`);
+  }
+  if (posteriorDisponible && Number.isInteger(attr.simulaciones) && attr.simulaciones > 0) {
+    mensajes.push(`Resultado posterior estimado con ${numeros.format(attr.simulaciones)} simulaciones.`);
+  }
+  if (inicialDisponible && posteriorDisponible) {
+    const cambio = (attr.attr_posterior - attr.attr_inicial) * 100;
+    if (cambio === 0) {
+      mensajes.push("El ATTR se mantiene para estos nodos clave en la simulación. El mapa muestra el riesgo de cada enlace.");
+    } else {
+      const variacion = new Intl.NumberFormat("es-CL", { signDisplay: "always", maximumFractionDigits: 3 });
+      mensajes.push(`Cambio estimado de ${variacion.format(cambio)} puntos porcentuales.`);
+    }
+  }
+  const detalle = document.querySelector("#detalle-attr");
+  detalle.textContent = mensajes.join(" ");
+  detalle.hidden = mensajes.length === 0;
+}
 
 function vincularCapa(mapa, control, capa) {
   function actualizarVisibilidad() {
@@ -19,6 +79,7 @@ function crearPopup(titulo, ...lineas) {
   encabezado.textContent = titulo;
   contenido.append(encabezado);
   for (const linea of lineas) {
+    if (!linea) continue;
     const detalle = document.createElement("div");
     detalle.textContent = linea;
     contenido.append(detalle);
@@ -31,6 +92,8 @@ async function iniciarMapa() {
     avisoMapa.textContent = "No se pudo cargar Leaflet. Revisa la conexión a Internet.";
     avisoMapa.hidden = false;
     estadoMapa.textContent = "Capas no disponibles";
+    attrAntes.textContent = "No disponible";
+    attrDespues.textContent = "No disponible";
     return;
   }
 
@@ -59,22 +122,49 @@ async function iniciarMapa() {
     const puntosSitio = datos.features.filter((f) => f.properties.tipo === "sitio");
     const sismo = datos.features.find((f) => f.properties.tipo === "sismo");
     if (!lineasFibra.length || !sismo) throw new Error("Falta la fibra observada o el sismo del 27F.");
+    const escenario = document.querySelector("#escenario-mapa");
+    const hayEscenario = lineasFibra.some(({ properties }) => esProbabilidad(properties.prob_falla));
+    const estiloFibra = ({ properties: enlace }) => ({
+      color: colores.getPropertyValue(escenario.value === "posterior" ? colorFalla(enlace) : "--fibra").trim(),
+      weight: 2.5,
+    });
     const fibra = L.geoJSON(lineasFibra, {
-      style: { color: colores.getPropertyValue("--fibra").trim(), weight: 2.5 },
+      style: estiloFibra,
       onEachFeature({ properties: enlace }, capa) {
-        capa.bindPopup(crearPopup(`Enlace observado ${enlace.id}`, `${numeros.format(enlace.longitud_m)} m`));
+        capa.bindPopup(crearPopup(`Enlace observado ${enlace.id}`,
+          `${numeros.format(enlace.longitud_m)} m`,
+          textoFalla(enlace)));
       },
     });
+    if (hayEscenario) {
+      const leyenda = document.querySelector("#leyenda-falla");
+      const muestra = document.querySelector("#mostrar-fibra + .muestra");
+      function cambiarEscenario() {
+        const posterior = escenario.value === "posterior";
+        fibra.setStyle(estiloFibra);
+        leyenda.hidden = !posterior;
+        muestra.classList.toggle("por-probabilidad", posterior);
+      }
+      escenario.value = "posterior";
+      escenario.addEventListener("change", cambiarEscenario);
+      document.querySelector("#control-escenario").hidden = false;
+      document.querySelector("#estado-falla").textContent = "Probabilidades disponibles en Escenario 27F.";
+      cambiarEscenario();
+    }
 
-    // Mantener los accesos encima de la fibra al cambiar la visibilidad de las capas.
+    // Mantiene los accesos encima al reactivar la fibra.
     mapa.createPane("accesos").style.zIndex = "410";
     const accesos = L.geoJSON(lineasAcceso, {
       renderer: L.svg({ pane: "accesos" }),
       style: { color: colores.getPropertyValue("--acceso").trim(), weight: 4, dashArray: "7 6" },
       onEachFeature({ properties: enlace }, capa) {
+        const supuesto = enlace.alcance_modelo === "supuesto"
+          ? "Se supuso operativo para el escenario 27F (0 % de falla)."
+          : null;
         capa.bindPopup(crearPopup(`Acceso sintético · ${enlace.nombre}`,
           `${numeros.format(enlace.longitud_m)} m hasta el vértice ${enlace.target}`,
-          enlace.justificacion));
+          enlace.justificacion,
+          supuesto));
       },
     });
 
@@ -163,8 +253,12 @@ async function iniciarMapa() {
     if (asociados < puntosSitio.length) {
       estadoMapa.textContent += " Los pendientes tienen un marcador vacío.";
     }
+
+    actualizarAttr(datos.attr);
   } catch (error) {
     estadoMapa.textContent = "No se pudieron cargar los datos del mapa.";
+    attrAntes.textContent = "No disponible";
+    attrDespues.textContent = "No disponible";
     console.error(error);
   }
 }

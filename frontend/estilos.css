@@ -4,6 +4,10 @@
   --secundario: #52645b;
   --borde: #d9e3dc;
   --fibra: #087d68;
+  --falla-baja: #ad780f;
+  --falla-media: #cd4c27;
+  --falla-alta: #911647;
+  --fuera-alcance: #72797b;
   --acceso: #9a590d;
   --sitio: #285985;
   --sismo: #b4442c;
@@ -111,6 +115,14 @@ h2 { font-size: 1rem; }
   border-bottom: 1px solid var(--borde);
 }
 
+.selector-escenario:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
 button, select {
   border: 1px solid #c4d8ce;
   border-radius: 0.45rem;
@@ -173,11 +185,44 @@ button:disabled, select:disabled { opacity: 0.55; cursor: default; }
 
 .muestra { display: inline-block; }
 
-.muestra-fibra {
+.muestra-fibra, .muestra-falla-baja, .muestra-falla-media, .muestra-falla-alta, .muestra-fuera-alcance {
   width: 0.95rem;
   height: 3px;
   border-radius: 2px;
-  background: var(--fibra);
+}
+
+.muestra-fibra { background: var(--fibra); }
+.muestra-falla-baja { background: var(--falla-baja); }
+.muestra-falla-media { background: var(--falla-media); }
+.muestra-falla-alta { background: var(--falla-alta); }
+.muestra-fuera-alcance { background: var(--fuera-alcance); }
+
+.muestra-fibra.por-probabilidad {
+  background: linear-gradient(90deg, var(--fibra), var(--falla-baja), var(--falla-alta));
+}
+
+.leyenda-falla {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--borde);
+  font-size: 0.82rem;
+}
+
+.leyenda-falla h3 {
+  margin: 0 0 0.3rem;
+  font-size: inherit;
+}
+
+.leyenda-falla ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leyenda-falla li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
 }
 
 .muestra-acceso {

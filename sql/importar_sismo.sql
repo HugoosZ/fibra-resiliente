@@ -16,8 +16,8 @@ SELECT
     evento->>'id',
     to_timestamp((evento #>> '{properties,time}')::double precision / 1000),
     (evento #>> '{properties,mag}')::double precision,
+    -- La tercera coordenada de USGS es la profundidad en kilómetros.
     (evento #>> '{geometry,coordinates,2}')::double precision,
-    -- Guardamos la profundidad en kilómetros por separado del punto lon/lat.
     ST_Force2D(ST_GeomFromGeoJSON(evento->'geometry'))
 FROM origen
 ON CONFLICT (id_usgs) DO UPDATE SET

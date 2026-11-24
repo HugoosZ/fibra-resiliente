@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.accesos_sinteticos (
     CHECK (source <> target)
 );
 
--- Asignar a cada sitio su propio vértice, después de los IDs de la red observada.
+-- Los terminales y accesos usan IDs posteriores a los de la red observada.
 WITH seleccion (sitio_id, orden) AS (
     VALUES ('google-param', 1),
            ('pit-huechuraba', 2),
