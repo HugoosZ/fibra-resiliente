@@ -40,7 +40,7 @@ La comparación usó los mismos trazados y la misma regla de corte. Se eligió 1
 | 10 cm | 1.958 | 2.080 | 138 | 223 |
 | 1 m | 1.958 | 2.079 | 137 | 223 |
 
-`fibra_enlaces` guarda `source`, `target` y `prob_falla`, que parte en `0`. `fibra_enlaces_vertices_pgr` guarda los 2.080 vértices de la red observada. Esta es una muestra de esa tabla con los puntos que reciben los accesos de los sitios clave.
+`fibra_enlaces` guarda `source`, `target` y `prob_falla`, que parte en `0`. `fibra_enlaces_vertices_pgr` guarda los 2.080 vértices de la red observada. Los IDs de esta tabla y de la tabla de sitios corresponden a una ejecución de referencia. Al reconstruir la topología pueden cambiar. Las coordenadas de `the_geom` permiten reconocer el mismo punto en otra ejecución.
 
 | `id` | `the_geom` (longitud, latitud) |
 | ---: | --- |
@@ -53,7 +53,7 @@ La comparación usó los mismos trazados y la misma regla de corte. Se eligió 1
 
 Se eligieron cinco sitios que procesan, intercambian, transportan o reciben tráfico. La tabla muestra las coordenadas de cada instalación o del punto de referencia documentado.
 
-| Sitio (latitud, longitud) | Rol | Terminal → vértice | Acceso (m) | Fuentes |
+| Sitio (latitud, longitud) | Rol | Terminal → vértice (ejemplo) | Acceso (m) | Fuentes |
 | --- | --- | --- | ---: | --- |
 | Google PARAM, Quilicura (−33,35830 · −70,69646) | Centro de datos que procesa y entrega servicios | 2081 → 505 | 955,5 | [Google](https://datacenters.google/intl/es-419/locations/quilicura-chile/) · [SEA](https://infofirma.sea.gob.cl/DocumentosSEA/MostrarDocumento?docId=41%2Fb2%2Fcb84bb5d771c27e818fe1ad882ad0c553bb9) |
 | PIT Chile en Cirion SAN1, Huechuraba (−33,35799 · −70,67626) | Intercambio de tráfico entre redes | 2082 → 505 | 2.439,4 | [PIT Chile](https://www.pitchile.cl/wp/como-conectarse/) · [PeeringDB](https://www.peeringdb.com/fac/2093) |
@@ -125,7 +125,7 @@ El ATTR es `Σ P(el par tiene camino) / cantidad de pares`. Con cinco sitios se 
 | Antes del sismo | 5 | 10 | 1 | 0,10 |
 | Después del sismo | 5 | 10 | 1 (exacto) | 0,10 |
 
-Google–PIT es el único par conectado. El camino `Google 2081 → 505 → PIT 2082` usa los dos accesos sintéticos que el escenario mantiene operativos. SAm-1, REUNA Puerto Montt y UdeC están cada uno en una componente distinta de todos los demás sitios clave desde el inicio. Los 21 enlaces con riesgo positivo quedan fuera del único camino entre terminales y los nueve pares desconectados siguen así. Por eso el escenario mantiene las conexiones entre sitios clave. La diferencia es **0 puntos porcentuales** y la variación relativa es **0 %**.
+Google–PIT es el único par conectado. Cada sitio tiene su propio terminal y un acceso sintético que llega al mismo punto del catastro, `POINT(-70.700582 -33.366189)` en orden longitud, latitud. Es el vértice más cercano para ambos y recibió el ID 505 en la ejecución de referencia. El escenario mantiene operativos los dos accesos. SAm-1, REUNA Puerto Montt y UdeC están cada uno en una componente distinta de todos los demás sitios clave desde el inicio. Los 21 enlaces con riesgo positivo quedan fuera del único camino entre terminales y los nueve pares desconectados siguen así. La diferencia es **0 puntos porcentuales** y la variación relativa es **0 %**.
 
 ### Comparación con el 27F de 2010
 
